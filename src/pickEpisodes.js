@@ -95,9 +95,7 @@ const pickEpisodes = async () => {
 
   pickedEpisodes = pickedEpisodes.filter((el) => el && el.episodeUrl)
 
-  console.log(pickedEpisodes)
-
   return pickedEpisodes
 }
 
-module.exports = { pickEpisodes }
+module.exports = pickEpisodes
