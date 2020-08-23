@@ -1,26 +1,34 @@
 require('dotenv').config()
 
+const { GOOGLE_CLOUD_PROJECT, WAIT } = process.env
+
 const publicIp = require('public-ip')
 const request = require('superagent')
 
-const { ddlPartOfBinary } = require('./src/utils')
-const { rebootModem } = require('./src/modem')
-const pickEpisodes = require('./src/pickEpisodes')
-const pickUA = require('./src/pickUA')
+const { rebootModem } = require('./lib/modem')
+const pickEpisodes = require('./lib/pickEpisodes')
+const pickUA = require('./lib/pickUA')
+const { ddlPartOfBinary, sleepFromOhConfig } = require('./lib/utils')
 
-async function pickAndRequest() {
-  const ip = await publicIp.v4()
+const insertInBQ = GOOGLE_CLOUD_PROJECT ? require('./lib/insertInBQ') : null
+
+const MIN_NB_BYTES = 1500000
+
+const pickAndRequest = async () => {
+  const IP = await publicIp.v4()
   const pickedEpisodes = await pickEpisodes()
   const pickedUA = await pickUA()
 
   for (let i = 0; i < pickedEpisodes.length; i++) {
     const { episodeUrl, episodeTitle } = pickedEpisodes[i]
-    // request 1 minute of data
     try {
-      await ddlPartOfBinary(request.get(episodeUrl))
+      await ddlPartOfBinary(
+        request.get(episodeUrl).set('User-Agent', pickedUA),
+        MIN_NB_BYTES
+      )
       Object.assign(pickedEpisodes[i], {
         requestDate: new Date(),
-        ip,
+        IP,
         UA: pickedUA
       })
     } catch (e) {
@@ -31,12 +39,21 @@ async function pickAndRequest() {
   return pickedEpisodes.filter(({ requestDate }) => requestDate)
 }
 
-async function process() {
-  const downloads = await pickAndRequest()
-  console.log(downloads)
-  //// insert (podcastTitle, episodeTitle, episodeDate, episodeUrl, requestDate, ip, ua) into BQ
-  //rebootModem()
-  // wait according OH
+const unitProcess = async () => {
+  try {
+    const downloads = await pickAndRequest()
+    if (insertInBQ && downloads.length) await insertInBQ(downloads)
+    await rebootModem()
+    await sleepFromOhConfig(WAIT)
+  } catch (e) {
+    console.error('Error in the unit process', e)
+  }
 }
 
-process().catch(console.error)
+const main = async () => {
+  while (true) {
+    await unitProcess()
+  }
+}
+
+main().catch((e) => console.error('GLOBAL ERROR', e))
