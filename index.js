@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { GOOGLE_CLOUD_PROJECT, WAIT } = process.env
+const { GOOGLE_CLOUD_PROJECT, MIN_NB_BYTES, WAIT } = process.env
 
 const publicIp = require('public-ip')
 const request = require('superagent')
@@ -11,8 +11,6 @@ const pickUA = require('./lib/pickUA')
 const { ddlPartOfBinary, sleepFromOhConfig } = require('./lib/utils')
 
 const insertInBQ = GOOGLE_CLOUD_PROJECT ? require('./lib/insertInBQ') : null
-
-const MIN_NB_BYTES = 1500000
 
 const pickAndRequest = async () => {
   const IP = await publicIp.v4()
