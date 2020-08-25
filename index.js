@@ -15,11 +15,14 @@ const insertInBQ = GOOGLE_CLOUD_PROJECT ? require('./lib/insertInBQ') : null
 const pickAndRequest = async () => {
   const IP = await publicIp.v4()
   const pickedEpisodes = await pickEpisodes()
-  const pickedUA = await pickUA()
+  // const pickedUA = await pickUA()
 
   for (let i = 0; i < pickedEpisodes.length; i++) {
     const { episodeUrl, episodeTitle } = pickedEpisodes[i]
     try {
+      // let's try another UA for each request ?
+      const pickedUA = await pickUA()
+
       await ddlPartOfBinary(
         request.get(episodeUrl).set('User-Agent', pickedUA),
         MIN_NB_BYTES
