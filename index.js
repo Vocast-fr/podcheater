@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const { GOOGLE_CLOUD_PROJECT, MIN_NB_BYTES, WAIT } = process.env
+const { DEV, GOOGLE_CLOUD_PROJECT, MIN_NB_BYTES, WAIT } = process.env
 
 const publicIp = require('public-ip')
 const request = require('superagent')
@@ -40,8 +40,8 @@ const pickAndRequest = async () => {
 const unitProcess = async () => {
   try {
     const downloads = await pickAndRequest()
-    if (insertInBQ && downloads.length) await insertInBQ(downloads)
-    await rebootModem()
+    if (!DEV && insertInBQ && downloads.length) await insertInBQ(downloads)
+    if (!DEV) await rebootModem()
     await sleepFromOhConfig(WAIT)
   } catch (e) {
     console.error('Error in the unit process', e)

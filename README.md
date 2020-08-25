@@ -2,7 +2,7 @@
 
 Use 4G modem and different user agents to get fake certified podcast downloads
 
-## What is does
+## What it does
 
 The process runs a loop following this scenario :
 
@@ -10,7 +10,7 @@ The process runs a loop following this scenario :
 
 2. Select an user agent from [WhatIsMyBrowser API](https://developers.whatismybrowser.com/), according expected frequencies of app usage (configured with `UA_PROP` environment variable).
 
-3. Request the picked episodes with the fake User Agent. Request only a part of the MP3 (`MIN_NB_BYTES` environment variable), and then abort.
+3. Request the picked episodes with the fake user agent. Request only a part of the file (`MIN_NB_BYTES` environment variable), and then abort.
 
 4. Reboot the modem with device API, to get a new IP address
 
@@ -48,6 +48,10 @@ This is the IP address related to the Huawei modem's API. It seems to be `192.16
 
 Array of podcasts' feeds urls to request to.
 
+### MAX_NB_ITEMS (optionnal, default = 10)
+
+Maximum number of items the process should download during a single iteration
+
 ### MIN_NB_BYTES (required)
 
 The minimum amount of episode data to download, for each request. Set for example to 1500000 bytes, as [IAB asks to ignore downloads with less than 60 seconds transferred](https://iabtechlab.com/wp-content/uploads/2017/12/Podcast_Measurement_v2-Dec-20-2017.pdf).
@@ -63,7 +67,7 @@ The `frequencies` key provides the [WhatIsMyBrowser's database search parameters
 ```
 [
   {
-    // all time oh could be "10:00-13:00" to express from 10am to 1pm for example
+    // Here "24/7" means "all time". "oh" could be "10:00-13:00" to express from 10am to 1pm for example
     "oh":"24/7",
 
     "frequencies":[
