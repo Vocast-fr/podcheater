@@ -32,9 +32,9 @@
     "@google-cloud/bigquery": "^5.2.0",
     "dotenv": "^8.2.0",
     "moment": "^2.27.0",
+    "opening_hours": "^3.5.0",
     "public-ip": "^4.0.2",
     "random-selector": "^1.0.12",
-    "simple-opening-hours": "^0.1.1",
     "superagent": "^6.0.0",
     "xml-js": "^1.6.11"
   }
