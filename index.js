@@ -45,7 +45,11 @@ const unitProcess = async () => {
     const downloads = await pickAndRequest()
     if (!DEV && insertInBQ && downloads.length) await insertInBQ(downloads)
     if (!DEV) await rebootModem()
-    await sleepFromOhConfig(WAIT)
+    if (!DEV) {
+      await sleepFromOhConfig(WAIT)
+    } else {
+      await sleepFromOhConfig('[{"oh":"24/7", "seconds": "10"}]')
+    }
   } catch (e) {
     console.error('Error in the unit process', e)
   }
