@@ -14,7 +14,7 @@ The process runs a loop following this scenario :
 
 4. Reboot the modem with device API, to get a new IP address
 
-5. Wait a specific amount of time according the configuration with `WAIT` environment variable.
+5. Wait internet is up, and then wait again a specific amount of time according the configuration with `WAIT` environment variable.
 
 ## Requirements
 

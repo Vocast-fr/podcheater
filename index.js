@@ -8,7 +8,12 @@ const request = require('superagent')
 const { rebootModem } = require('./lib/modem')
 const pickEpisodes = require('./lib/pickEpisodes')
 const pickUA = require('./lib/pickUA')
-const { ddlPartOfBinary, sleepFromOhConfig } = require('./lib/utils')
+const { ddlPartOfBinary } = require('./lib/utils')
+const {
+  sleep,
+  sleepFromOhConfig,
+  waitUntilConnectionIsUp
+} = require('./lib/wait')
 
 const insertInBQ = GOOGLE_CLOUD_PROJECT ? require('./lib/insertInBQ') : null
 
@@ -45,10 +50,11 @@ const unitProcess = async () => {
     const downloads = await pickAndRequest()
     if (!DEV && insertInBQ && downloads.length) await insertInBQ(downloads)
     if (!DEV) await rebootModem()
+    await waitUntilConnectionIsUp()
     if (!DEV) {
       await sleepFromOhConfig(WAIT)
     } else {
-      await sleepFromOhConfig('[{"oh":"24/7", "seconds": "10"}]')
+      await sleep(10)
     }
   } catch (e) {
     console.error('Error in the unit process', e)
