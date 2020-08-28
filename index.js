@@ -15,11 +15,10 @@ const unitProcess = async () => {
   try {
     const downloads = await pickAndRequest()
 
-    // console.log({ downloads })
-
     if (insertInBQ && downloads.length) await insertInBQ(downloads)
 
     await rebootModem()
+
     await waitUntilConnectionIsUp()
 
     await sleepFromOhConfig(WAIT)

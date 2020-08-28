@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@google-cloud/bigquery": "^5.2.0",
-    "await-internet": "^1.0.0",
+    "check-internet-connected": "^2.0.5",
     "deepcopy": "^2.1.0",
     "dotenv": "^8.2.0",
     "moment": "^2.27.0",
