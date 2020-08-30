@@ -8,9 +8,9 @@ The process runs a loop following this scenario :
 
 1. Get several episodes' information from input podcasts feeds. A random number of items are picked. The more recent the content is, the more probabilities it has to get chosen. The more episodes published dates are ancient, the less number of picked items are.
 
-2. Select an user agent from [WhatIsMyBrowser API](https://developers.whatismybrowser.com/), according expected frequencies of app usage (configured with `UA_PROP` environment variable).
+2. Select user agents from [WhatIsMyBrowser API](https://developers.whatismybrowser.com/), according expected frequencies of app usage (configured with `UA_PROP` environment variable).
 
-3. Request the picked episodes with the fake user agent. Request only a part of the file (`MIN_NB_BYTES` environment variable), and then abort.
+3. Request the picked episodes with select user agents. Request only a part of the file (`MIN_NB_BYTES` environment variable), and then abort.
 
 4. Reboot the modem with device API, to get a new IP address
 
@@ -28,22 +28,6 @@ A valid `.env` is required
 
 `cp .env_example .env`
 
-### BQ_DATASET_ID (not required)
-
-If a valid podcast download needs to be recorded in a Google BigQuery table, set the dataset id
-
-### BQ_TABLE_ID (not required)
-
-If a valid podcast download needs to be recorded in a Google BigQuery table, set the table id
-
-### GOOGLE_CLOUD_PROJECT (not required)
-
-If a valid podcast download needs to be recorded in a Google BigQuery table, set the GCP project id
-
-### MODEM_IP (required)
-
-This is the IP address related to the Huawei modem's API. It seems to be `192.168.8.1` in many cases.
-
 ### FEEDS (required)
 
 Array of podcasts' feeds urls to request to.
@@ -51,6 +35,14 @@ Array of podcasts' feeds urls to request to.
 ### MAX_NB_ITEMS (optionnal, default = 10)
 
 Maximum number of items the process should download during a single iteration
+
+### MODEM_IP (required)
+
+This is the IP address related to the Huawei modem's API. It seems to be `192.168.8.1` in many cases.
+
+### WIMB_KEY (required)
+
+API key from WhatIsMyBrowser to get access to specific User-Agent. Once logged, get it from [here](https://accounts.whatismybrowser.com/admin/applications/)
 
 ### MIN_NB_BYTES (required)
 
@@ -135,11 +127,11 @@ The one provided in the `.env_example` is valid.
 
 The `frequencies` key provides the desired number of seconds.
 
-`Example with WAIT=[{"oh":"02:00-07:00", "seconds": "600"}, {"oh":"24/7", "seconds": "45"}]`
+`Example with WAIT=[{"oh":"Mo-Fr 10:00-13:00", "seconds": "60"}, {"oh":"24/7", "seconds": "200"}]`
 
 ```
 [
-  // If working weekdays from 10am to 1pm, wait 60 seconds (1 minute)
+  // If actual time is in working weekdays from 10am to 1pm, wait 60 seconds (1 minute)
   {
     "oh":"Mo-Fr 10:00-13:00",
     "seconds": "60"
@@ -153,10 +145,59 @@ The `frequencies` key provides the desired number of seconds.
 ]
 ```
 
-### WIMB_KEY (not required)
+### BQ_DATASET_ID (not required)
 
-API key from WhatIsMyBrowser to get access to specific User-Agent. Once logged, get it from [here](https://accounts.whatismybrowser.com/admin/applications/)
+If a valid download needs to be recorded in a Google BigQuery table, set the dataset id
+
+### BQ_TABLE_ID (not required)
+
+If a valid download needs to be recorded in a Google BigQuery table, set the table id
+
+| fieldName    | type      | mode     |
+| ------------ | --------- | -------- |
+| requestDate  | TIMESTAMP | REQUIRED |
+| podcastTitle | STRING    | NULLABLE |
+| episodeTitle | STRING    | NULLABLE |
+| episodeUrl   | STRING    | NULLABLE |
+| episodeDate  | TIMESTAMP | NULLABLE |
+| IP           | STRING    | NULLABLE |
+| UA           | STRING    | NULLABLE |
+
+Recommanded : Partitionned by day, by `requestDate`. Clustered by `IP, UA`
+
+### GOOGLE_CLOUD_PROJECT (not required)
+
+If a valid download needs to be recorded in a Google BigQuery table, set the GCP project id
+
+### REQUEST_RESULTS_URL (not required)
+
+If this environment variable is set, the process requests this URL and provides downloads values through `downloads` GET parameter.
+
+```
+// in GET query string parameters
+downloads : [
+  {
+    requestDate: Date,
+    podcastTitle: string,
+    episodeTitle: string,,
+    episodeUrl: string,
+    episodeDate: string,
+    IP: string,
+    UA: string,
+  }
+]
+```
+
+### LOG (not required)
+
+Verbose to see each executed steps.
 
 ## Run
 
 `npm run start`
+
+## What needs to be improved
+
+- Another strategy to select user agent, free from WhatIsMyBrowser, and "smarter"
+- Provide values from Deezer, and others podcast apps.
+- User agent cleaning : replace language informations, ...
